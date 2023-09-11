@@ -1,0 +1,28 @@
+# required
+vendorName: UBOS
+extensionKey: Puck
+# defines which loaders are used
+loader: [model, contentModel, controller]
+
+# optional
+model:
+  # default: Classes/Domain/Model
+  path: Classes/Domain/Model
+  # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Domain\Model
+  namespace: UBOS\Puck\Domain\Model
+contentModel:
+  # default: {models.path}/Content
+  path: Classes/Domain/Model/Content
+  # default {models.namespace}\Content
+  namespace: UBOS\Puck\Domain\Model\Content
+controller:
+  # default: Classes/Controller
+  path: Classes/Controller
+  # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Controller
+  namespace: UBOS\Puck\Controller
+# default: LLL:EXT:{extensionKey}/Resources/Private/Language/locallang_be.xlf
+languageFile: LLL:EXT:puck/Resources/Private/Language/locallang_be.xlf
+# default: {extensionKey}_
+iconIdentifierPrefix: puck_
+# default: {extensionKey}_
+cTypePrefix: puck_

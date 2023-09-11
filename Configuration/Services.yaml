@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+  UBOS\Puckloader\:
+    resource: '../Classes/*'
+  UBOS\Puck\EventListener\DatabaseListener:
+    tags:
+      - name: event.listener
+        identifier: 'puckloader/databaseListener'
+        event: TYPO3\CMS\Core\Database\Event\AlterTableDefinitionStatementsEvent
+

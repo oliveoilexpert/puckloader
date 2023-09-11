@@ -1,0 +1,25 @@
+{
+  "name": "oliveoilexpert/puckloader",
+  "type": "typo3-cms-extension",
+  "description": "Custom autoloader for TYPO3 Extensions",
+  "license": "GPL-2.0-or-later",
+  "version": "0.1.0",
+  "require": {
+    "php": "^8",
+    "typo3/cms-core": "^11.5 || ^12.4",
+    "b13/container": "^2.2"
+  },
+  "replace": {
+    "typo3-ter/puckloader": "self.version"
+  },
+  "autoload": {
+    "psr-4": {
+      "UBOS\\Puckloader\\": "Classes/"
+    }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "puckloader"
+    }
+  }
+}
