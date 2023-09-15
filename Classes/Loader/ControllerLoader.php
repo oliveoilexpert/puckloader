@@ -4,9 +4,10 @@ namespace UBOS\Puckloader\Loader;
 
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use UBOS\Puckloader\Attribute\Plugin;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
+use UBOS\Puckloader\Configuration;
+use UBOS\Puckloader\Attribute\Plugin;
 
 class ControllerLoader extends AbstractLoader
 {
@@ -72,9 +73,11 @@ class ControllerLoader extends AbstractLoader
             );
         }
     }
+
     public static function loadTables(string $extensionKey): void
     {
     }
+
     public static function loadTca(string $extensionKey): void
     {
         foreach (static::getLoaderInformation($extensionKey) as $plugin) {

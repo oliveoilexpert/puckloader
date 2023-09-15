@@ -12,7 +12,9 @@ class PluginElement
      */
     public function __construct(
         public string $pluginName,
-        public string $piFlexFormValue = ''
+        public string $piFlexFormValue = '',
+        public string $extensionName = '',
+        public string $vendorName = ''
     )
     {
     }

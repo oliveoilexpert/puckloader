@@ -1,0 +1,47 @@
+# required
+vendorName: UBOS
+extensionKey: puck
+# defines which loaders are used
+loader: [model, controller, contentModel, pageModel]
+
+# optional
+model:
+  # default: Classes/Domain/Model
+  path: Classes/Domain/Model
+  # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Domain\Model
+  namespace: UBOS\Puck\Domain\Model
+contentModel:
+  # default: {models.path}/Content
+  path: Classes/Domain/Model/Content
+  # default {models.namespace}\Content
+  namespace: UBOS\Puck\Domain\Model\Content
+  # default: Content
+  pluginName: Content
+  # default: Puckloader
+  extensionName: Puckloader
+  # default: UBOS
+  vendorName: UBOS
+  # default: EXT:{extensionKey}/Resources/Private/Templates/
+  templateRootPath: EXT:puck/Resources/Private/Templates/
+  # default: EXT:{extensionKey}/Resources/Private/Partials/
+  partialRootPath: EXT:puck/Resources/Private/Partials/
+  # default: EXT:{extensionKey}/Resources/Private/Layouts/
+  layoutRootPath: EXT:puck/Resources/Private/Layouts/
+  # default: ''
+  previewRenderer: ''
+pageModel:
+  # default: {models.path}/Page
+  path: Classes/Domain/Model/Page
+  # default: {models.namespace}\Page
+  namespace: UBOS\Puck\Domain\Model\Page
+controller:
+  # default: Classes/Controller
+  path: Classes/Controller
+  # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Controller
+  namespace: UBOS\Puck\Controller
+# default: LLL:EXT:{extensionKey}/Resources/Private/Language/locallang_be.xlf
+languageFile: LLL:EXT:puck/Resources/Private/Language/locallang_be.xlf
+# default: {extensionKey}_
+iconIdentifierPrefix: puck_
+# default: {extensionKey}_
+cTypePrefix: puck_

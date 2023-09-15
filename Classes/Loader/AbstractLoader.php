@@ -12,6 +12,7 @@ abstract class AbstractLoader
 
     protected static function getLoaderInformation($extensionKey): array
     {
+        // todo cache
         if (!static::$loaderInformation[$extensionKey] ?? null) {
             static::buildInformation($extensionKey);
         }

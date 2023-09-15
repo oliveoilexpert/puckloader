@@ -7,23 +7,22 @@ use ReflectionException;
 use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\PathUtility;
 use B13\Container\Tca\ContainerConfiguration;
 use B13\Container\Tca\Registry;
+use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\ContainerElement;
 use UBOS\Puckloader\Attribute\ContentElementWizard;
 use UBOS\Puckloader\Attribute\PluginElement;
-use UBOS\Puckloader\Preview\PuckPreviewRenderer;
-use UBOS\Puckloader\Utility\PuckUtility;
 
 /**
- * Class ContentModelLoaderUtility <br>
- * Loads all classes from the puck/Classes/Domain/Model/Content folder <br>
+ * Class ContentModelLoader <br>
+ * Loads all classes from the Content  folder <br>
  * Registers them as content elements based on class attributes ContentElementWizard, ContainerElement and PluginElement <br>
  * Registering them as content elements is done by adding them to the CType select, New Content Element Wizard, defining the frontend typoscript
  */
 class ContentModelLoader extends AbstractLoader
 {
-    // array of content model base information
     protected static array $modelRegister = [];
 
     protected static function getModelRegister(string $extensionKey): array
@@ -32,7 +31,14 @@ class ContentModelLoader extends AbstractLoader
             return static::$modelRegister[$extensionKey];
         }
         $conf = Configuration::get($extensionKey);
-        $files = PuckUtility::getBaseFilesInDir($conf['contentModel']['path'], 'php');
+        if (!is_dir($conf['contentModel']['path'])) {
+            return [];
+        }
+        $files = GeneralUtility::getFilesInDir($conf['contentModel']['path'], 'php');
+        foreach ($files as $key => $file) {
+            $files[$key] = PathUtility::pathinfo($file, PATHINFO_FILENAME);
+        }
+        $files = array_values($files);
         static::$modelRegister[$extensionKey] = [];
         foreach($files as $file) {
             static::$modelRegister[$extensionKey][] = [
@@ -52,6 +58,7 @@ class ContentModelLoader extends AbstractLoader
     {
         $groupKeys = [];
         $types = [];
+        $conf = Configuration::get($extensionKey);
         $wizardGroups = static::sortModelsByWizardTabAndOrder(static::getModelRegister($extensionKey));
         foreach($wizardGroups as $groupKey => $group) {
 
@@ -62,7 +69,7 @@ class ContentModelLoader extends AbstractLoader
                 $refClass = new ReflectionClass($model['fullName']);
                 $refPluginElement = $refClass->getAttributes(PluginElement::class)[0] ?? null;
                 $refContainerElement = $refClass->getAttributes(ContainerElement::class)[0] ?? null;
-
+                $pluginName = $refPluginElement?->newInstance()->pluginName;
                 // set types
                 $type = [
                     'key' => $model['typeKey'],
@@ -70,7 +77,9 @@ class ContentModelLoader extends AbstractLoader
                     'name' => $model['name'],
                     'lowercaseName' => $model['lowerCaseUnderscored'],
                     'iconIdentifier' => $model['lowerCaseUnderscored'],
-                    'pluginName' => $refPluginElement?->newInstance()->pluginName ?? 'Content',
+                    'pluginName' => $pluginName ?? $conf['contentModel']['pluginName'],
+                    'extensionName' => $pluginName ? ($refPluginElement?->newInstance()->extensionName ?: $conf['extensionName']) : $conf['contentModel']['extensionName'],
+                    'vendorName' => $pluginName ? ($refPluginElement?->newInstance()->vendorName ?: $conf['vendorName']) : $conf['contentModel']['vendorName'],
                     'piFlexFormValue' => $refPluginElement?->newInstance()?->piFlexFormValue,
                     'containerConfiguration' => $refContainerElement?->newInstance()?->configuration,
                     'containerDataProcessing' => '',
@@ -163,7 +172,9 @@ class ContentModelLoader extends AbstractLoader
                 );
                 //$GLOBALS['TCA']['tt_content']['types'][$type['key']] = $previousFieldDefinition;
                 // what do here? to do update
-                $GLOBALS['TCA']['tt_content']['types'][$type['key']]['previewRenderer'] = PuckPreviewRenderer::class;
+                if ($conf['contentModel']['previewRenderer']) {
+                    $GLOBALS['TCA']['tt_content']['types'][$type['key']]['previewRenderer'] = $conf['contentModel']['previewRenderer'];
+                }
             } else {
                 ExtensionManagementUtility::addTcaSelectItem(
                     'tt_content',
@@ -204,6 +215,7 @@ class ContentModelLoader extends AbstractLoader
     public static function loadConf(string $extensionKey): void
     {
         $loaderInformation = static::getLoaderInformation($extensionKey);
+        $conf = Configuration::get($extensionKey);
         foreach($loaderInformation['types'] as $type) {
             ExtensionManagementUtility::addTypoScript(
                 $extensionKey,
@@ -213,18 +225,19 @@ class ContentModelLoader extends AbstractLoader
         tt_content.'.$type['key'].'.20 = USER
         tt_content.'.$type['key'].'.20  {
                 userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-                extensionName = Puck
+                extensionName = ' . $type['extensionName'] . '
                 pluginName = ' . $type['pluginName'] . '
-                vendorName = UBOS
+                vendorName = ' . $type['vendorName'] . '
                 settings {
-                    contentElement = '.$type['name'].'
-                    extensionKey = puck
-                    vendorName = UBOS
+                    modelName = ' . $type['name'] . '
+                    modelNamespace = ' . $conf['contentModel']['namespace'] . '
                     dataProcessing {
                         '.$type['containerDataProcessing'].'
                     }
                     view {
-                        templateRootPath = EXT:' . $extensionKey . '/Resources/Private/Fluid/
+                        templateRootPath = ' . $conf['contentModel']['templateRootPath'] . '
+                        partialRootPath = ' . $conf['contentModel']['partialRootPath'] . '
+                        layoutRootPath = ' . $conf['contentModel']['layoutRootPath'] . '
                     }
                 }   
         }',

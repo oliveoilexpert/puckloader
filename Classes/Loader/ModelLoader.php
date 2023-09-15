@@ -4,6 +4,7 @@ namespace UBOS\Puckloader\Loader;
 
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\ModelColumn;
 use UBOS\Puckloader\Attribute\ModelPersistence;
 
@@ -51,7 +52,7 @@ class ModelLoader extends AbstractLoader
     {
         $sql = [];
         foreach(Configuration::getAll() as $conf) {
-            if ($conf['model']['load']) {
+            if ($conf[ModelLoader::class]) {
                 $sql = array_merge($sql, static::getLoaderInformation($conf['extensionKey'])['sql']);
             }
         }
