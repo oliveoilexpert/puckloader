@@ -10,7 +10,7 @@ use UBOS\Puckloader\Attribute\ModelPersistence;
 
 class ModelLoader extends AbstractLoader
 {
-    protected static function buildInformation(string $extensionKey): void
+    public static function buildInformation(string $extensionKey): array
     {
         $conf = Configuration::get($extensionKey);
         $modelPaths = GeneralUtility::getAllFilesAndFoldersInPath(
@@ -43,7 +43,7 @@ class ModelLoader extends AbstractLoader
                 $sqlStrings[] = LF . 'CREATE TABLE ' . $tableName . ' (' . LF . implode(',' . LF, $columns) . LF . ');' . LF;
             }
         }
-        static::$loaderInformation[$extensionKey] = [
+        return [
             'sql' => $sqlStrings,
         ];
     }
@@ -53,19 +53,19 @@ class ModelLoader extends AbstractLoader
         $sql = [];
         foreach(Configuration::getAll() as $conf) {
             if ($conf[ModelLoader::class]) {
-                $sql = array_merge($sql, static::getLoaderInformation($conf['extensionKey'])['sql']);
+                $sql = array_merge($sql, static::buildInformation($conf['extensionKey'])['sql']);
             }
         }
         return $sql;
     }
 
-    public static function loadConf(string $extensionKey): void
+    public static function loadConf(string $extensionKey, array $information): void
     {
     }
-    public static function loadTables(string $extensionKey): void
+    public static function loadTables(string $extensionKey, array $information): void
     {
     }
-    public static function loadTca(string $extensionKey): void
+    public static function loadTca(string $extensionKey, array $information): void
     {
     }
 }

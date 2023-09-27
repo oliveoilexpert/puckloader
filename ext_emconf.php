@@ -13,6 +13,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'constraints' => array(
 		'depends' => array(
             'typo3' => '11.5 - 12.4',
+            'container' => '^2.2'
     ),
 		'conflicts' => array(
 		),

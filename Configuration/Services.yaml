@@ -5,7 +5,7 @@ services:
     public: false
   UBOS\Puckloader\:
     resource: '../Classes/*'
-  UBOS\Puck\EventListener\DatabaseListener:
+  UBOS\Puckloader\EventListener\DatabaseListener:
     tags:
       - name: event.listener
         identifier: 'puckloader/databaseListener'

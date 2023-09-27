@@ -2,8 +2,7 @@
 vendorName: UBOS
 extensionKey: puck
 # defines which loaders are used
-loader: [model, controller, contentModel, pageModel]
-
+loader: [ model, controller, contentModel, pageModel ]
 # optional
 model:
   # default: Classes/Domain/Model

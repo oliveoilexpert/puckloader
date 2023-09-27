@@ -46,13 +46,14 @@ class PageModelLoader extends AbstractLoader
     /**
      * @throws ReflectionException
      */
-    protected static function buildInformation(string $extensionKey): void
+    public static function buildInformation(string $extensionKey): array
     {
+        $return = [];
         foreach(static::getModelRegister($extensionKey) as $model) {
             $refClass = new ReflectionClass($model['fullName']);
             $refModelPersistence = $refClass->getAttributes(ModelPersistence::class)[0] ?? null;
             if ($refModelPersistence?->newInstance()->recordType ?? null) {
-                static::$loaderInformation[$extensionKey][] = [
+                $return[] = [
                     'key' => $refModelPersistence?->newInstance()->recordType,
                     'name' => $model['name'],
                     'lowercaseName' => $model['lowerCaseUnderscored'],
@@ -60,16 +61,17 @@ class PageModelLoader extends AbstractLoader
                 ];
             }
         }
+        return $return;
     }
 
-    public static function loadTables(string $extensionKey): void
+    public static function loadTables(string $extensionKey, array $information): void
     {
     }
 
-    public static function loadTca(string $extensionKey): void
+    public static function loadTca(string $extensionKey, array $information): void
     {
         $conf = Configuration::get($extensionKey);
-        foreach(static::getLoaderInformation($extensionKey) as $type) {
+        foreach($information as $type) {
             ExtensionManagementUtility::addTcaSelectItem(
                 'pages',
                 'doktype',
@@ -87,7 +89,7 @@ class PageModelLoader extends AbstractLoader
         }
     }
 
-    public static function loadConf(string $extensionKey): void
+    public static function loadConf(string $extensionKey, array $information): void
     {
     }
 

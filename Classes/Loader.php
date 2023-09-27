@@ -1,7 +1,8 @@
 <?php
 
-namespace UBOS\Puckloader\Loader;
+namespace UBOS\Puckloader;
 
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use UBOS\Puckloader\Loader\ModelLoader;
@@ -17,13 +18,32 @@ class Loader
         PageModelLoader::class,
         ControllerLoader::class,
     ];
+    public static ?array $loaderInformation = null;
+
+    protected static function getInformationForExtensionAndLoader(string $extensionKey, string $loader): array
+    {
+        // todo cache
+        if (!static::$loaderInformation) {
+            static::$loaderInformation = [
+                ModelLoader::class => [],
+                ContentModelLoader::class => [],
+                PageModelLoader::class => [],
+                ControllerLoader::class => [],
+            ];
+        }
+        if (!(static::$loaderInformation[$loader][$extensionKey] ?? null)) {
+            static::$loaderInformation[$loader][$extensionKey] = $loader::buildInformation($extensionKey);
+            //DebugUtility::debug(static::$loaderInformation[$loader][$extensionKey]);
+        }
+        return static::$loaderInformation[$loader][$extensionKey];
+    }
 
     public static function loadConf(string $extensionKey): void
     {
         $conf = Configuration::get($extensionKey);
         foreach(self::LOADERS as $loader) {
             if ($conf[$loader]) {
-                $loader::loadConf($extensionKey);
+                $loader::loadConf($extensionKey, static::getInformationForExtensionAndLoader($extensionKey,$loader));
             }
         }
     }
@@ -32,17 +52,16 @@ class Loader
         $conf = Configuration::get($extensionKey);
         foreach(self::LOADERS as $loader) {
             if ($conf[$loader]) {
-                $loader::loadTables($extensionKey);
+                $loader::loadTables($extensionKey, static::getInformationForExtensionAndLoader($extensionKey,$loader));
             }
         }
     }
-
     public static function loadTca(string $extensionKey): void
     {
         $conf = Configuration::get($extensionKey);
         foreach(self::LOADERS as $loader) {
             if ($conf[$loader]) {
-                $loader::loadTca($extensionKey);
+                $loader::loadTca($extensionKey, static::getInformationForExtensionAndLoader($extensionKey,$loader));
             }
         }
     }

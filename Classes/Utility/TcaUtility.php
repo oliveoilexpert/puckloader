@@ -4,12 +4,22 @@ namespace UBOS\Puckloader\Utility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Information\Typo3Version;
 
-/**
- *
- */
 class TcaUtility
 {
+
+    protected static int $version = 0;
+
+    public static function getVersion(): int
+    {
+        if (self::$version) {
+            return self::$version;
+        }
+        $version = GeneralUtility::makeInstance(Typo3Version::class);
+        self::$version = $version->getMajorVersion();
+        return self::$version;
+    }
     public const STANDARD_CROP_RATIOS = [
         'free' => [
             'title' => 'free',
@@ -150,5 +160,27 @@ class TcaUtility
         --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:notes,
             rowDescription,
         --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:extended,';
+    }
+
+    public static function selectItemsHelper(array $items): array
+    {
+        $v12Items = [];
+        foreach($items as $item) {
+            $v12Items[] = self::selectItemHelper($item);
+        }
+        return $v12Items;
+    }
+
+    public static function selectItemHelper(array $item): array
+    {
+        if (self::getVersion() < 12) {
+            return $item;
+        }
+        return [
+            'label' => $item[0] ?? $item['label'],
+            'value' => $item[1] ?? $item['value'],
+            'icon' => $item[2] ?? $item['icon'] ??  '',
+            'group' => $item[3] ?? $item['group'] ?? '',
+        ];
     }
 }

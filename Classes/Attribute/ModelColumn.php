@@ -28,10 +28,13 @@ class ModelColumn
             'text' => 'text',
             'link' => 'varchar(1024) DEFAULT \'\' NOT NULL',
             'array' => 'text',
-            'datetime' => 'int(11) DEFAULT \'0\' NOT NULL',
+            'datetime' => 'int(11) UNSIGNED DEFAULT \'0\' NOT NULL',
             'Object' => 'varchar(255) DEFAULT \'\' NOT NULL',
             'FileReference' => 'int(11) DEFAULT \'0\' NOT NULL',
             'ObjectStorage' => 'varchar(255) DEFAULT \'\' NOT NULL',
+
+            'varchar255' => 'varchar(255) DEFAULT \'\' NOT NULL',
+            'varchar1024' => 'varchar(1024) DEFAULT \'\' NOT NULL',
 
             'tinyint' => 'tinyint(4) DEFAULT \'0\' NOT NULL',
             'float' => 'float DEFAULT \'0\' NOT NULL',

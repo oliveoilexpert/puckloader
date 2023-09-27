@@ -1,6 +1,6 @@
- <?php
- defined('TYPO3') or die();
+<?php
+defined('TYPO3') or die();
 
- use UBOS\Puckloader\Loader;
+use UBOS\Puckloader\Loader;
 
- Loader::loadTables('puckloader');
+Loader::loadTables('puckloader');

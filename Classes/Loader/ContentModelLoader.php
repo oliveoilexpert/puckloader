@@ -14,6 +14,8 @@ use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\ContainerElement;
 use UBOS\Puckloader\Attribute\ContentElementWizard;
 use UBOS\Puckloader\Attribute\PluginElement;
+use UBOS\Puckloader\Attribute\FlexFormProperty;
+use UBOS\Puckloader\Utility\TcaUtility;
 
 /**
  * Class ContentModelLoader <br>
@@ -54,7 +56,7 @@ class ContentModelLoader extends AbstractLoader
     /**
      * @throws ReflectionException
      */
-    protected static function buildInformation(string $extensionKey): void
+    public static function buildInformation(string $extensionKey): array
     {
         $groupKeys = [];
         $types = [];
@@ -70,6 +72,18 @@ class ContentModelLoader extends AbstractLoader
                 $refPluginElement = $refClass->getAttributes(PluginElement::class)[0] ?? null;
                 $refContainerElement = $refClass->getAttributes(ContainerElement::class)[0] ?? null;
                 $pluginName = $refPluginElement?->newInstance()->pluginName;
+                $flexformProperties = [];
+                foreach ($refClass->getProperties() as $property) {
+                    $refFlexFormProperty = $property->getAttributes(FlexFormProperty::class) ?? null;
+                    if ($refFlexFormProperty) {
+                        $column = GeneralUtility::camelCaseToLowerCaseUnderscored($property->getName());
+                        $flexFormValue = $refFlexFormProperty[0]->newInstance()->flexFormValue;
+                        if ($flexFormValue) {
+                            $flexformProperties[$column] = $flexFormValue;
+                        }
+                    }
+                }
+
                 // set types
                 $type = [
                     'key' => $model['typeKey'],
@@ -83,6 +97,7 @@ class ContentModelLoader extends AbstractLoader
                     'piFlexFormValue' => $refPluginElement?->newInstance()?->piFlexFormValue,
                     'containerConfiguration' => $refContainerElement?->newInstance()?->configuration,
                     'containerDataProcessing' => '',
+                    'flexformProperties' => $flexformProperties,
                 ];
 
                 if (is_array($type['containerConfiguration'])) {
@@ -101,24 +116,23 @@ class ContentModelLoader extends AbstractLoader
                 $types[] = $type;
             }
         }
-        static::$loaderInformation[$extensionKey] = [
+        return [
             'groupKeys' => $groupKeys,
             'types' => $types,
         ];
     }
 
-    public static function loadTables(string $extensionKey): void
+    public static function loadTables(string $extensionKey, array $information): void
     {
-        $loaderInformation = static::getLoaderInformation($extensionKey);
         $conf = Configuration::get($extensionKey);
-        foreach($loaderInformation['groupKeys'] as $key) {
+        foreach($information['groupKeys'] as $key) {
             ExtensionManagementUtility::addPageTSConfig('
                 mod.wizards.newContentElement.wizardItems.'.$key.' {
                   header = '.$conf['languageFile'].':wizard.'.$key.'.header
                 }
             ');
         }
-        foreach($loaderInformation['types'] as $type) {
+        foreach($information['types'] as $type) {
             ExtensionManagementUtility::addPageTSConfig('
                 mod.wizards.newContentElement.wizardItems.' . $type['groupKey'] . '.elements.' . $type['key'] . ' {
                         iconIdentifier = ' . $type['iconIdentifier'] . '
@@ -134,11 +148,10 @@ class ContentModelLoader extends AbstractLoader
         }
     }
 
-    public static function loadTca(string $extensionKey): void
+    public static function loadTca(string $extensionKey, array $information): void
     {
-        $loaderInformation = static::getLoaderInformation($extensionKey);
         $conf = Configuration::get($extensionKey);
-        foreach($loaderInformation['groupKeys'] as $key) {
+        foreach($information['groupKeys'] as $key) {
             ExtensionManagementUtility::addTcaSelectItemGroup(
                 'tt_content',
                 'CType',
@@ -146,7 +159,7 @@ class ContentModelLoader extends AbstractLoader
                 $conf['languageFile'].'wizard.'.$key.'.header',
             );
         }
-        foreach($loaderInformation['types'] as $type) {
+        foreach($information['types'] as $type) {
 
             if ($type['piFlexFormValue']) {
                 ExtensionManagementUtility::addPiFlexFormValue(
@@ -154,6 +167,11 @@ class ContentModelLoader extends AbstractLoader
                     $type['piFlexFormValue'],
                     $type['key']
                 );
+            }
+            foreach ($type['flexformProperties'] as $column => $value) {
+                if (is_array($GLOBALS['TCA']['tt_content']['columns']) && is_array($GLOBALS['TCA']['tt_content']['columns'][$column]['config']['ds'])) {
+                    $GLOBALS['TCA']['tt_content']['columns'][$column]['config']['ds']['*' . ',' . $type['key']] = $value;
+                }
             }
             if ($type['containerConfiguration']) {
                 //$previousFieldDefinition = $GLOBALS['TCA']['tt_content']['types'][$type['key']];
@@ -172,51 +190,51 @@ class ContentModelLoader extends AbstractLoader
                 );
                 //$GLOBALS['TCA']['tt_content']['types'][$type['key']] = $previousFieldDefinition;
                 // what do here? to do update
-                if ($conf['contentModel']['previewRenderer']) {
-                    $GLOBALS['TCA']['tt_content']['types'][$type['key']]['previewRenderer'] = $conf['contentModel']['previewRenderer'];
-                }
             } else {
                 ExtensionManagementUtility::addTcaSelectItem(
                     'tt_content',
                     'CType',
-                    [
-                        'label' => $conf['languageFile'].':content.element.'.$type['lowercaseName'],
-                        'value' => $type['key'],
-                        'icon' => $type['iconIdentifier'],
-                        'group' => $type['groupKey'],
-                    ],
+                    TcaUtility::selectItemHelper([
+                        $conf['languageFile'].':content.element.'.$type['lowercaseName'],
+                        $type['key'],
+                        $type['iconIdentifier'],
+                        $type['groupKey'],
+                    ]),
                 );
+            }
+            if ($conf['contentModel']['previewRenderer']) {
+                $GLOBALS['TCA']['tt_content']['types'][$type['key']]['previewRenderer'] = $conf['contentModel']['previewRenderer'];
             }
             $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes'][$type['key']] = $type['iconIdentifier'];
         }
+
         // to do update => container fix for new tca select item format
         foreach($GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] as $key => $item) {
             if (!isset($item['value'])) {
-                $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][$key] = [
-                    'label' => $item[0],
-                    'value' => $item[1],
-                    'icon' => $item[2] ?? '',
-                    'group' => $item[3] ?? '',
-                ];
+                $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'][$key] = TcaUtility::selectItemHelper([
+                    $item[0],
+                    $item[1],
+                    $item[2] ?? '',
+                    $item[3] ?? '',
+                ]);
             }
         }
         foreach($GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['items'] as $key => $item) {
             if (!isset($item['value'])) {
-                $GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['items'][$key] = [
-                    'label' => $item[0],
-                    'value' => $item[1],
-                    'icon' => $item[2] ?? '',
-                    'group' => $item[3] ?? '',
-                ];
+                $GLOBALS['TCA']['tt_content']['columns']['colPos']['config']['items'][$key] = TcaUtility::selectItemHelper([
+                    $item[0],
+                    $item[1],
+                    $item[2] ?? '',
+                    $item[3] ?? '',
+                ]);
             }
         }
     }
 
-    public static function loadConf(string $extensionKey): void
+    public static function loadConf(string $extensionKey, array $information): void
     {
-        $loaderInformation = static::getLoaderInformation($extensionKey);
         $conf = Configuration::get($extensionKey);
-        foreach($loaderInformation['types'] as $type) {
+        foreach($information['types'] as $type) {
             ExtensionManagementUtility::addTypoScript(
                 $extensionKey,
                 'setup',

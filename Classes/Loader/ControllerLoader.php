@@ -2,6 +2,7 @@
 
 namespace UBOS\Puckloader\Loader;
 
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
@@ -11,7 +12,7 @@ use UBOS\Puckloader\Attribute\Plugin;
 
 class ControllerLoader extends AbstractLoader
 {
-    protected static function buildInformation($extensionKey): void
+    public static function buildInformation($extensionKey): array
     {
         $conf = Configuration::get($extensionKey);
         $controllerPaths = GeneralUtility::getAllFilesAndFoldersInPath(
@@ -20,6 +21,7 @@ class ControllerLoader extends AbstractLoader
             extList: 'php',
             excludePattern: '^(?!.*Controller\.php$).*$'
         );
+        $return = [];
         foreach ($controllerPaths as $path) {
             $path = str_replace('.php', '', $path);
             $fullName = $conf['controller']['namespace'] . str_replace('/', '\\', explode($conf['controller']['path'], $path)[1]);
@@ -46,25 +48,25 @@ class ControllerLoader extends AbstractLoader
                         $nonCacheableActions[$fullName] = $actionName;
                     }
                 }
-                static::$loaderInformation[$extensionKey][] = [
-                    'extensionKey' => 'puck',
+                $return[] = [
+                    'extensionKey' => $extensionKey,
                     'pluginKey' => $pluginAttributeInstance->name,
                     'controllerFullName' => $fullName,
                     'actionName' => $actionName,
                     'label' => 'LLL:EXT:puck/Resources/Private/Language/locallang_be.xlf:plugin.'.$lowerCaseName,
                     'icon' => 'puck_plugin_'.$lowerCaseName,
-                    'groupKey' => 'puck',
+                    'groupKey' => $extensionKey,
                     'cacheableActions' => $cacheableActions,
                     'nonCacheableActions' => $nonCacheableActions,
                 ];
             }
         }
-
+        return $return;
     }
 
-    public static function loadConf(string $extensionKey): void
+    public static function loadConf(string $extensionKey, array $information): void
     {
-        foreach (static::getLoaderInformation($extensionKey) as $plugin) {
+        foreach ($information as $plugin) {
             ExtensionUtility::configurePlugin(
                 $plugin['extensionKey'],
                 $plugin['pluginKey'],
@@ -74,13 +76,13 @@ class ControllerLoader extends AbstractLoader
         }
     }
 
-    public static function loadTables(string $extensionKey): void
+    public static function loadTables(string $extensionKey, array $information): void
     {
     }
 
-    public static function loadTca(string $extensionKey): void
+    public static function loadTca(string $extensionKey, array $information): void
     {
-        foreach (static::getLoaderInformation($extensionKey) as $plugin) {
+        foreach ($information as $plugin) {
             ExtensionUtility::registerPlugin(
                 $plugin['extensionKey'],
                 $plugin['pluginKey'],

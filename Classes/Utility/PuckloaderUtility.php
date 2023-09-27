@@ -1,10 +1,13 @@
 <?php
-namespace UBOS\Puckloader\Loader;
+namespace UBOS\Puckloader\Utility;
 
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
+use UBOS\Puckloader\Attribute\ModelColumn;
+use UBOS\Puckloader\Attribute\ModelPersistence;
 use UBOS\Puckloader\Configuration;
 
 class PuckloaderUtility
