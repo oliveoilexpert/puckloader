@@ -247,6 +247,9 @@ class ContentModelLoader extends AbstractLoader
                 pluginName = ' . $type['pluginName'] . '
                 vendorName = ' . $type['vendorName'] . '
                 settings {
+                    pluginName = ' . $type['pluginName'] . '
+                    extensionKey = ' . $type['extensionName'] . '
+                    vendorName = ' . $type['vendorName'] . '
                     modelName = ' . $type['name'] . '
                     modelNamespace = ' . $conf['contentModel']['namespace'] . '
                     dataProcessing {

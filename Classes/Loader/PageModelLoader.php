@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\ModelPersistence;
+use UBOS\Puckloader\Utility\TcaUtility;
 
 /**
  * Class PageModelLoader
@@ -75,17 +76,17 @@ class PageModelLoader extends AbstractLoader
             ExtensionManagementUtility::addTcaSelectItem(
                 'pages',
                 'doktype',
-                [
-                    'label' => $conf['languageFile'].':doktype.'.$type['lowercaseName'],
-                    'value' => $type['key'],
-                    'icon' => $type['iconIdentifier'],
-                ],
+                TcaUtility::selectItemHelper([
+                    $conf['languageFile'].':doktype.'.$type['lowercaseName'],
+                    $type['key'],
+                    $type['iconIdentifier'],
+                ]),
                 '1',
                 'after'
             );
-            $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes'][$type['key']] = $type['iconIdentifier'];
-            $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes'][$type['key'] . '-hideinmenu'] = $type['iconIdentifier'. '_hideinmenu'];
-            $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes'][$type['key'] . '-root'] = 'apps-pagetree-page-domain';
+            $GLOBALS['TCA']['pages']['ctrl']['typeicon_classes'][$type['key']] = $type['iconIdentifier'];
+            $GLOBALS['TCA']['pages']['ctrl']['typeicon_classes'][$type['key'] . '-hideinmenu'] = $type['iconIdentifier']. '_hideinmenu';
+            $GLOBALS['TCA']['pages']['ctrl']['typeicon_classes'][$type['key'] . '-root'] = 'apps-pagetree-page-domain';
         }
     }
 

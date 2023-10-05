@@ -24,9 +24,10 @@ class PuckloaderUtility
         );
         $configuration = [];
         foreach ($iconPaths as $iconPath) {
-            $configuration[$conf['iconIdentifierPrefix'] . GeneralUtility::camelCaseToLowerCaseUnderscored(PathUtility::pathinfo($path, PATHINFO_FILENAME))] = [
+            $filename = PathUtility::pathinfo($iconPath, PATHINFO_FILENAME);
+            $configuration[$conf['iconIdentifierPrefix'] . GeneralUtility::camelCaseToLowerCaseUnderscored($filename)] = [
                 'provider' => SvgIconProvider::class,
-                'source' => 'EXT:' . $extensionKey . '/'. $path . $iconPath
+                'source' => 'EXT:' . $extensionKey . '/'. $path . $filename . '.svg'
             ];
         }
         return $configuration;
