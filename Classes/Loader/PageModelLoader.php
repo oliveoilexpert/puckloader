@@ -15,7 +15,7 @@ use UBOS\Puckloader\Utility\TcaUtility;
 /**
  * Class PageModelLoader
  */
-class PageModelLoader extends AbstractLoader
+class PageModelLoader implements LoaderInterface
 {
     protected static array $modelRegister = [];
 

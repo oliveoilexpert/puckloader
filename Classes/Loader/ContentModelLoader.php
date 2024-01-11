@@ -23,7 +23,7 @@ use UBOS\Puckloader\Utility\TcaUtility;
  * Registers them as content elements based on class attributes ContentElementWizard, ContainerElement and PluginElement <br>
  * Registering them as content elements is done by adding them to the CType select, New Content Element Wizard, defining the frontend typoscript
  */
-class ContentModelLoader extends AbstractLoader
+class ContentModelLoader implements LoaderInterface
 {
     protected static array $modelRegister = [];
 

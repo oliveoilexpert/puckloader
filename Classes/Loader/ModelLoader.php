@@ -8,7 +8,7 @@ use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\ModelColumn;
 use UBOS\Puckloader\Attribute\ModelPersistence;
 
-class ModelLoader extends AbstractLoader
+class ModelLoader implements LoaderInterface
 {
     public static function buildInformation(string $extensionKey): array
     {

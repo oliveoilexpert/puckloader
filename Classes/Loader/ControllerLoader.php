@@ -10,7 +10,7 @@ use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use UBOS\Puckloader\Configuration;
 use UBOS\Puckloader\Attribute\Plugin;
 
-class ControllerLoader extends AbstractLoader
+class ControllerLoader implements LoaderInterface
 {
     public static function buildInformation($extensionKey): array
     {
@@ -34,18 +34,18 @@ class ControllerLoader extends AbstractLoader
                 $pluginAttributeInstance = $pluginAttribute->newInstance();
                 $lowerCaseName = GeneralUtility::camelCaseToLowerCaseUnderscored($pluginAttributeInstance->name);
                 $actionName = str_replace('Action', '', $method->getName());
-                $cacheableActions = $pluginAttributeInstance->cacheableActions ?? [];
-                $nonCacheableActions = $pluginAttributeInstance->nonCacheableActions ?? [];
-                if (isset($cacheableActions[$fullName])) {
-                    $cacheableActions[$fullName] = $cacheableActions[$fullName] . ',' . $actionName;
+                $actions = $pluginAttributeInstance->actions ?? [];
+                $noCacheActions = $pluginAttributeInstance->noCacheActions ?? [];
+                if (isset($actions[$fullName])) {
+                    $actions[$fullName] = $actionName . ',' . $actions[$fullName];
                 } else {
-                    $cacheableActions[$fullName] = $actionName;
+                    $actions[$fullName] = $actionName;
                 }
                 if ($pluginAttributeInstance->noCache) {
-                    if (isset($nonCacheableActions[$fullName])) {
-                        $nonCacheableActions[$fullName] = $nonCacheableActions[$fullName] . ',' . $actionName;
+                    if (isset($noCacheActions[$fullName])) {
+                        $noCacheActions[$fullName] = $actionName . ',' . $noCacheActions[$fullName];
                     } else {
-                        $nonCacheableActions[$fullName] = $actionName;
+                        $noCacheActions[$fullName] = $actionName;
                     }
                 }
                 $return[] = [
@@ -53,11 +53,14 @@ class ControllerLoader extends AbstractLoader
                     'pluginKey' => $pluginAttributeInstance->name,
                     'controllerFullName' => $fullName,
                     'actionName' => $actionName,
-                    'label' => 'LLL:EXT:puck/Resources/Private/Language/locallang_be.xlf:plugin.'.$lowerCaseName,
+                    'label' => $conf['languageFile'] . ':plugin.'.$lowerCaseName,
                     'icon' => 'puck_plugin_'.$lowerCaseName,
                     'groupKey' => $extensionKey,
-                    'cacheableActions' => $cacheableActions,
-                    'nonCacheableActions' => $nonCacheableActions,
+                    'actions' => $actions,
+                    'noCacheActions' => $noCacheActions,
+                    'typeNum' => $pluginAttributeInstance->typeNum ?? 0,
+                    'extensionName' => $conf['extensionName'],
+                    'vendorName' => $conf['vendorName'],
                 ];
             }
         }
@@ -67,11 +70,36 @@ class ControllerLoader extends AbstractLoader
     public static function loadConf(string $extensionKey, array $information): void
     {
         foreach ($information as $plugin) {
+            if ($plugin['typeNum']) {
+                ExtensionManagementUtility::addTypoScript(
+                    $extensionKey,
+                    'setup',
+                    '
+            ' . $plugin['pluginKey'] . 'PluginFragmentPage = PAGE
+            ' . $plugin['pluginKey'] . 'PluginFragmentPage {
+                typeNum = ' . $plugin['typeNum'] . '
+                20 = USER
+                20 {
+                    userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+                    extensionName = ' . $plugin['extensionName'] . '
+                    vendorName = ' . $plugin['vendorName'] . '
+                    pluginName = ' . $plugin['pluginKey'] . '
+                }
+                config {
+                    disableAllHeaderCode = 1
+                    debug = 0
+                    admPanel = 0
+                }
+            }
+        ',
+                    'defaultContentRendering'
+                );
+            }
             ExtensionUtility::configurePlugin(
                 $plugin['extensionKey'],
                 $plugin['pluginKey'],
-                $plugin['cacheableActions'],
-                $plugin['nonCacheableActions']
+                $plugin['actions'],
+                $plugin['noCacheActions']
             );
         }
     }

@@ -13,8 +13,9 @@ class Plugin
     public function __construct(
         public string $name,
         public bool $noCache = false,
-        public array $cacheableActions = [],
-        public array $nonCacheableActions = []
+        public int $typeNum = 0,
+        public array $actions = [],
+        public array $noCacheActions = []
     )
     {
     }
