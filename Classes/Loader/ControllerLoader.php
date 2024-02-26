@@ -55,10 +55,11 @@ class ControllerLoader implements LoaderInterface
                     'actionName' => $actionName,
                     'label' => $conf['languageFile'] . ':plugin.'.$lowerCaseName,
                     'icon' => 'puck_plugin_'.$lowerCaseName,
+                    'signature' => $extensionKey . '_' . str_replace('_', '', $lowerCaseName),
                     'groupKey' => $extensionKey,
                     'actions' => $actions,
                     'noCacheActions' => $noCacheActions,
-                    'typeNum' => $pluginAttributeInstance->typeNum ?? 0,
+                    'fragment' => $pluginAttributeInstance->fragment,
                     'extensionName' => $conf['extensionName'],
                     'vendorName' => $conf['vendorName'],
                 ];
@@ -70,14 +71,14 @@ class ControllerLoader implements LoaderInterface
     public static function loadConf(string $extensionKey, array $information): void
     {
         foreach ($information as $plugin) {
-            if ($plugin['typeNum']) {
+            if ($plugin['fragment']['typeNum']) {
                 ExtensionManagementUtility::addTypoScript(
                     $extensionKey,
                     'setup',
                     '
             ' . $plugin['pluginKey'] . 'PluginFragmentPage = PAGE
             ' . $plugin['pluginKey'] . 'PluginFragmentPage {
-                typeNum = ' . $plugin['typeNum'] . '
+                typeNum = ' . $plugin['fragment']['typeNum'] . '
                 20 = USER
                 20 {
                     userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
@@ -85,10 +86,16 @@ class ControllerLoader implements LoaderInterface
                     vendorName = ' . $plugin['vendorName'] . '
                     pluginName = ' . $plugin['pluginKey'] . '
                 }
+                meta {
+                    robots = noindex, nofollow
+                    robots.replace = 1
+                }
                 config {
                     disableAllHeaderCode = 1
                     debug = 0
                     admPanel = 0
+                    index_enable = 0
+                    no_cache = '. $plugin['fragment']['noCache'] . '
                 }
             }
         ',
