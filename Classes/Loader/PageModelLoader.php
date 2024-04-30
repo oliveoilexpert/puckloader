@@ -80,6 +80,7 @@ class PageModelLoader implements LoaderInterface
                     $conf['languageFile'].':doktype.'.$type['lowercaseName'],
                     $type['key'],
                     $type['iconIdentifier'],
+                    'default'
                 ]),
                 '1',
                 'after'
