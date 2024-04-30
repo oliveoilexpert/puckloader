@@ -1,19 +1,20 @@
-# required
-vendorName: UBOS
-extensionKey: puck
+# REQUIRED
+vendorName: MyVendor
+extensionKey: my_ext
 # defines which loaders are used
 loader: [ model, controller, contentModel, pageModel ]
-# optional
+
+# OPTIONAL
 model:
   # default: Classes/Domain/Model
   path: Classes/Domain/Model
   # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Domain\Model
-  namespace: UBOS\Puck\Domain\Model
+  namespace: MyVendor\MyExt\Domain\Model
 contentModel:
   # default: {models.path}/Content
   path: Classes/Domain/Model/Content
   # default {models.namespace}\Content
-  namespace: UBOS\Puck\Domain\Model\Content
+  namespace: MyVendor\MyExt\Domain\Model\Content
   # default: Content
   pluginName: Content
   # default: Puckloader
@@ -21,26 +22,26 @@ contentModel:
   # default: UBOS
   vendorName: UBOS
   # default: EXT:{extensionKey}/Resources/Private/Templates/
-  templateRootPath: EXT:puck/Resources/Private/Templates/
+  templateRootPath: EXT:my_ext/Resources/Private/Templates/
   # default: EXT:{extensionKey}/Resources/Private/Partials/
-  partialRootPath: EXT:puck/Resources/Private/Partials/
+  partialRootPath: EXT:my_ext/Resources/Private/Partials/
   # default: EXT:{extensionKey}/Resources/Private/Layouts/
-  layoutRootPath: EXT:puck/Resources/Private/Layouts/
+  layoutRootPath: EXT:my_ext/Resources/Private/Layouts/
   # default: ''
   previewRenderer: ''
 pageModel:
   # default: {models.path}/Page
   path: Classes/Domain/Model/Page
   # default: {models.namespace}\Page
-  namespace: UBOS\Puck\Domain\Model\Page
+  namespace: MyVendor\MyExt\Domain\Model\Page
 controller:
   # default: Classes/Controller
   path: Classes/Controller
   # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Controller
-  namespace: UBOS\Puck\Controller
+  namespace: MyVendor\MyExt\Controller
 # default: LLL:EXT:{extensionKey}/Resources/Private/Language/locallang_be.xlf
-languageFile: LLL:EXT:puck/Resources/Private/Language/locallang_be.xlf
+languageFile: LLL:EXT:my_ext/Resources/Private/Language/locallang_be.xlf
 # default: {extensionKey}_
-iconIdentifierPrefix: puck_
+iconIdentifierPrefix: my_ext_
 # default: {extensionKey}_
-cTypePrefix: puck_
+cTypePrefix: my_ext_
