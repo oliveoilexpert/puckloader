@@ -17,16 +17,19 @@ class ContentController extends ActionController
     #[Plugin("Content")]
     public function indexAction(): ResponseInterface
     {
-        $data = $this->configurationManager->getContentObject()->data;
+        $contentObjectRenderer = $this->request->getAttribute('currentContentObject');
+        $data = $contentObjectRenderer->data;
         if (array_key_exists('dataProcessing', $this->settings)) {
             $contentDataProcessor = GeneralUtility::makeInstance(ContentDataProcessor::class);
             $dataProcessingAsTypoScriptArray = GeneralUtility::makeInstance(\TYPO3\CMS\Core\TypoScript\TypoScriptService::class)->convertPlainArrayToTypoScriptArray($this->settings['dataProcessing']);
             $variables = $contentDataProcessor->process(
-                $this->configurationManager->getContentObject(),
+                $contentObjectRenderer,
                 ['dataProcessing.' => $dataProcessingAsTypoScriptArray ?? null],
                 ['data' => $data]
             );
         }
+        $recordFactory = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Domain\RecordFactory::class);
+        $variables['record'] = $recordFactory->createResolvedRecordFromDatabaseRow('tt_content', $data);
         $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
         $variables['object'] = $dataMapper->map($this->settings['modelNamespace'] . $this->settings['modelName'], [$data])[0];
         $variables['settings'] = $this->settings;

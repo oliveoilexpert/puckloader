@@ -17,7 +17,7 @@ class Configuration
     protected static function buildConfigurationFromYaml(string $extensionKey): void
     {
         // todo cache
-        $yaml = (new YamlFileLoader)->load(ExtensionManagementUtility::extPath($extensionKey) . 'Configuration/Puckloader.yaml');
+        $yaml = (GeneralUtility::makeInstance(YamlFileLoader::class))->load(ExtensionManagementUtility::extPath($extensionKey) . 'Configuration/Puckloader.yaml');
         $extPath = ExtensionManagementUtility::extPath($yaml['extensionKey']);
         $extNamespace = $yaml['vendorName'] . '\\' . GeneralUtility::underscoredToUpperCamelCase($yaml['extensionKey']) . '\\';
         $modelPath = $extPath . ($yaml['model']['path'] ?? 'Classes/Domain/Model/');
