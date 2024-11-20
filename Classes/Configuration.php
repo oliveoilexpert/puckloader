@@ -52,6 +52,7 @@ class Configuration
             'controller' => [
                 'path' => $extPath . ($yaml['controller']['path'] ?? 'Classes/Controller/'),
                 'namespace' => $yaml['controller']['namespace'] ?? ($extNamespace . 'Controller\\'),
+                'register' => $yaml['controller']['register'] ?? true,
             ],
             'languageFile' => $yaml['languageFile'] ?? ('LLL:EXT:' . $yaml['extensionKey'] . '/Resources/Private/Language/locallang_be.xlf'),
             'iconIdentifierPrefix' => $yaml['iconIdentifierPrefix'] ?? ($yaml['extensionKey'] . '_'),
