@@ -1,3 +1,5 @@
 vendorName: UBOS
 extensionKey: puckloader
 loader: [ controller ]
+controller:
+  register: false

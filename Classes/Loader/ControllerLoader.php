@@ -62,6 +62,7 @@ class ControllerLoader implements LoaderInterface
                     'fragment' => $pluginAttributeInstance->fragment,
                     'extensionName' => $conf['extensionName'],
                     'vendorName' => $conf['vendorName'],
+                    'register' => $conf['controller']['register'],
                 ];
             }
         }
@@ -118,6 +119,9 @@ class ControllerLoader implements LoaderInterface
     public static function loadTca(string $extensionKey, array $information): void
     {
         foreach ($information as $plugin) {
+            if (!$plugin['register']) {
+                continue;
+            }
             ExtensionUtility::registerPlugin(
                 $plugin['extensionKey'],
                 $plugin['pluginKey'],

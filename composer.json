@@ -3,7 +3,7 @@
   "type": "typo3-cms-extension",
   "description": "Custom autoloader for TYPO3 Extensions",
   "license": "GPL-2.0-or-later",
-  "version": "0.1.4",
+  "version": "0.1.4.1",
   "require": {
     "php": "^8",
     "typo3/cms-core": "^13",

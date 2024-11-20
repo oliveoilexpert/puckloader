@@ -39,6 +39,7 @@ controller:
   path: Classes/Controller
   # default: {vendorName}\{extensionKey -> underscoredToUpperCamelCase()}\Controller
   namespace: MyVendor\MyExt\Controller
+  register: true
 # default: LLL:EXT:{extensionKey}/Resources/Private/Language/locallang_be.xlf
 languageFile: LLL:EXT:my_ext/Resources/Private/Language/locallang_be.xlf
 # default: {extensionKey}_
